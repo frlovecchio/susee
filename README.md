@@ -13,6 +13,7 @@ The main characteristics are:
 
 Install
 ------------
+Linux Debian
 $ pip install susee
 
 Usage
