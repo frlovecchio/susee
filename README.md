@@ -1,5 +1,7 @@
 Su.S.E.E. - SUpervisor System for Energy Efficiency
 
+------------- Energy Management System -----------------
+
 SUSEE has been developed to support Energy Managers to implement ISO 50001 Energy Management Systems, and Energy Audit.
 The Python script is able to read data from any Modbus device at fixed sampling time, transform and store data in a database. 
 
