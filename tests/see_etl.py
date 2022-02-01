@@ -30,55 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 '''
-This is a test file 
+Test file 
 '''
-ver = '1.0'
+ver='1.2.3'
+
 
 import time
 import sys
 import importlib
 from datetime import datetime
-
-#
-# Option: -d name_datafile.py
-#
-if len(sys.argv) > 1:
-    if sys.argv[1] == '-d':
-        customLib = ''
-        try:
-            customLib = sys.argv[2]
-            if customLib[-3:] == '.py':
-                customLib = customLib[:-3]
-            cLib = importlib.import_module(customLib, package=None)
-        except:
-            print(f"[msg] - error: custom data file: '{customLib}' not found")
-            exit()
-    else:
-        print('[msg] - error: option -d missing')
-        exit()
-else:
-    print('[msg] error: option -d missing')
-    exit()
-####################################
-
-# Load custom data from custom Module cLib
-idDevices_pack = cLib.idDevices_pack
-options_ = cLib.options_
-config_mysql = cLib.config_mysql
-sample_params = cLib.sample_params
-
-# from dataLib import idDevices_pack, options_, config_mysql, sample_params
-
-from susee.see_drivers import c_driver_P32
-from susee.see_functions import time_utc
-from susee.see_db import seedatadb  # svuota_file_array, push_file, string_to_file, data_store_pack, svuota_tempArray
-
 from socket import *
 import copy
 import pandas as pd
-
 import logging
-
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -86,19 +50,65 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# Check devices enabled
-xx = 0
-idDevices_pack1 = {}
-for x in idDevices_pack.keys():
-    if idDevices_pack[x]['enable']:
-        idDevices_pack1[xx] = idDevices_pack[x]
-        # print(f"Device {x}  - addr: {idDevices_pack[x]['idAddr']}, enabled: TRUE")
-        xx += 1
-    else:
-        pass
-        # print(f"Device {x}  - addr: {idDevices_pack[x]['idAddr']}, enabled: FALSE")
+class cLib:
+    pass
 
-idDevices_pack = idDevices_pack1
+
+def load_dataFile():
+    #Import the data file
+    #v1.0 2022-01-29
+
+    #
+    # Option: -d name_datafile.py
+    #
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '-d':
+            customLib = ''
+            try:
+                customLib = sys.argv[2]
+                if customLib[-3:] == '.py':
+                    customLib = customLib[:-3]
+                return importlib.import_module(customLib, package=None)
+            except:
+                print(f"[msg] - error: custom data file: '{customLib}' not found")
+                exit()
+        else:
+            print('[msg] - error: option -d missing')
+            exit()
+    else:
+        print('[msg] error: option -d missing')
+        exit()
+
+clib= load_dataFile()
+# Load custom data from custom Module cLib
+idDevices_pack = cLib.idDevices_pack
+options_ = cLib.options_
+config_mysql = cLib.config_mysql
+sample_params = cLib.sample_params
+####################################
+
+
+from ..susee.see_drivers import c_driver_P32
+from ..susee.see_functions import time_utc
+from ..susee.see_db import seedatadb
+
+
+
+
+def filter_devices(pack):
+    #Filters  enabled devices
+    #v1.0 2022-01-29
+    pack1={}
+    xx=0
+    for x in pack.keys():
+        if pack[x]['enable']:
+            pack1[xx]=pack[x]
+            xx += 1
+    return pack1
+
+#
+#Reads devices dataframe
+idDevices_pack = filter_devices(idDevices_pack)
 num_devices = len(idDevices_pack)
 
 if num_devices == 0:
@@ -120,8 +130,8 @@ def main():
     print('-' * 80)
     print('--- Studio Tecnico Pugliautomazione - Bari, Italy --- ')
     print('--- eng. Francesco Saverio Lovecchio, ph.D.       --- ')
-    print('    Read Devices Tool %s ' % ver)
-    print('    Data: %s ' % (time_utc()))
+    print('    ETL Tool %s ' % ver)
+    print('    UTC Data: %s ' % (time_utc()))
     print('-' * 80)
     dataToStore_ = {}
 
@@ -131,7 +141,6 @@ def main():
         for ii in idDevices_pack.keys():
             print('Device n. %s ' % (ii + 1))
             [print(' {}:  {}'.format(i, idDevices_pack[ii][i])) for i in idDevices_pack[ii].keys()]
-        print('>> Scan_params:')
         print('>> SampleParams: ')
         [print('>> {}: '.format(ii)) for ii in sample_params.items()]
         print('>> Database: ', config_mysql['host'])

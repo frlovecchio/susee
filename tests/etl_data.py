@@ -31,8 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ver = '1.0'
 
-idDevices_pack = {}
-
 sample_params = {
     'sampleTime': 10,  # [s]
     'sampleDelay': 0,  # [s]
@@ -42,6 +40,7 @@ sample_params = {
 }
 
 # List of devices
+idDevices_pack = {}
 idDevices_pack[0] = {
     'typeDev': 'P32',
     'idDev': 'd00',
@@ -53,6 +52,16 @@ idDevices_pack[0] = {
     'enable': 1,
 }
 
+idDevices_pack[1] = {
+    'typeDev': 'P33',
+    'idDev': 'd00',
+    'method': 'tcp',
+    'ipAddr_COM': '192.168.1.100',
+    'idAddr': 1,
+    'Port': '502',
+    'timeout': 1,
+    'enable': 0,
+}
 
 # Opzioni
 options_ = {
@@ -91,8 +100,8 @@ config_mysql = {
     'tableLast': 'see' + job_id + 'Last',
     'tableMac': 'see' + job_id + 'Mac',
     'tableParams': 'see' + job_id + 'Params',
-    'tableSys': 'see' + job_id + 'Sys',
     'tableProd': 'see' + job_id + 'Prod',
+    'tableSysRaw': 'see' + job_id + 'SysSetRaw',
     'language': 'ENG',
     'tZone': 'Europe/Rome',
 
