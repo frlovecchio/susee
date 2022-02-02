@@ -35,20 +35,22 @@ config_log = {
         'topstring' :   '-----  Start  Datetime_UTC:  ' + str(datetime.utcnow()) + ' ------ '
 }
 store_mode  = {
-        0           : 'None', 
-        1           : 'mysql_database',
-        2           : 'mysql_backup_file',
-        3           : 'array'
+        0 : 'None',
+        1 : 'mysql_database',
+        2 : 'mysql_backup_file',
+        3 : 'array'
 }
+
+# Communication error Code
 err_code = {
-        'err_connection'    : 1,
-        'driver error'      :  2,   #fixed driver error
-        'server_off'        :  4,   #2018-08-21
-        'err_register'      :     8,
-        'value_NaN'         :    16,
-        'lenreg_zero'       :    32,
+        'err_connection'    :   1,
+        'driver error'      :   2,
+        'server_off'        :   4,
+        'err_register'      :   8,
+        'value_NaN'         :   16,
+        'lenreg_zero'       :   32,
         'driver not found'  :   64,
- }
+}
 
 
 params_id = {
