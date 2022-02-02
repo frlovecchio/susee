@@ -126,7 +126,8 @@ c000 = seedatadb(config_mysql)
 
 
 def main():
-    # class init
+
+    # Messages
     print('-' * 80)
     print('--- Studio Tecnico Pugliautomazione - Bari, Italy --- ')
     print('--- eng. Francesco Saverio Lovecchio, ph.D.       --- ')
@@ -135,7 +136,7 @@ def main():
     print('-' * 80)
     dataToStore_ = {}
 
-    # Messages
+
     if options_['Messages']:
         print('>> Devices: ', num_devices)
         for ii in idDevices_pack.keys():
@@ -431,7 +432,6 @@ def sample_data(TimeNow_ns, devInstance_):
         }
     return _dataSample
 
-
 def check_OpenPorts(idDevices_pack):
     for i in range(len(idDevices_pack)):
         s = socket(AF_INET, SOCK_STREAM)
@@ -449,7 +449,6 @@ def check_OpenPorts(idDevices_pack):
                     idDevices_pack[i]['Port'])
                 )
     print('-' * 40)
-
 
 def sampleFlag_(sample_params, flag_old):
     # Sample flag
@@ -484,13 +483,11 @@ def sampleFlag_(sample_params, flag_old):
 
     return flag_sample, TimeNow, flag_old, TimeNow_ns, int(timeSeconds) % int(sampleTime)
 
-
 def t_to_DateTime(tt):
     # Convert time_ns() to DateTime
     # v0.0 2020-09-27
     t1 = datetime.fromtimestamp(tt * 10 ** -9)
     return t1.strftime('%Y-%m-%d %H:%M:%S.%f')
-
 
 def time_report(_dataToStore):
     # v1.0  2020-09-28
@@ -529,7 +526,6 @@ def time_report(_dataToStore):
                                    'rr_dtime[ms]'
                                    ])
     return df
-
 
 def sync_report(_dataToStore):
     # Syncronizatio report -

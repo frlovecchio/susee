@@ -27,9 +27,9 @@ import mysql.connector
 import os
 import pandas as pd
 
-from susee.see_comm import internet2
-from susee.see_dict import message_strings, err_code
-from susee.see_functions import time_utc, push_log, utctime_to_tZone, tZone_to_utctime, time_local
+from .see_comm import internet2
+from .see_dict import message_strings, err_code
+from .see_functions import time_utc, push_log, utctime_to_tZone, tZone_to_utctime, time_local
 
 
 class seedatadb:

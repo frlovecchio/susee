@@ -30,7 +30,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
-from susee.see_comm import  c_comm_devices
+from .see_comm import c_comm_devices
 
 
 class c_driver_P32(c_comm_devices):
@@ -55,17 +55,14 @@ class c_driver_P32(c_comm_devices):
         self.addrList = {}
         self.addrList[1] = (1, 83)
         self.addrList[2] = (801, 837)
-
-
         #pDict
         self.paramDict()
+
     def paramDict(self):
         # Elaborazione registri - valori
 
-        self.pDict = {}
         numPar = -1
         addrList=  self.addrList
-
 
         # 104 Tensione  L1L2
         numPar += 1

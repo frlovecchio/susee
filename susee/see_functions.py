@@ -17,9 +17,8 @@ from datetime import datetime
 from susee.see_dict import err_code
 
 ##############################
-###  Format Conversions ######
+###  Format Conversions Functions ######
 ##############################
-#Converte due word in un numero intero - swap on
 def ulongswap_convert(hexa, hexb):
     hh = hexa * 16 ** 4 + hexb
     #print('hexa,hexb, hh, int(hh): {} {} {} {} '.format(hexa,hexb, hh, int(hh) ))
@@ -37,55 +36,55 @@ def swap_convert(hexa):
         hh = hh-16**4 +1
     return int(hh)
 
-#Converte due word in float - swap on  
 def float_convert(hex_a, hex_b):
-    #import struct
+    #Converts two words in swapfloat
     hh = hex_a * 16 ** 4 + hex_b
     return float('{0:.2f}'.format(struct.unpack('!f',struct.pack('>I',hh))[0]))
-    
-#Converte quattro word in float - swap on   
+
 def double_convert(hex_a,hex_b,hex_c,hex_d):
-    #import struct
+    # Converts four words in  float
     hex_double = hex_a * 16 ** 12 + hex_b * 16 ** 8 + hex_c * 16 ** 4 + hex_d
     return float('{0:.2f}'.format(struct.unpack('!d',struct.pack('>Q',hex_double))[0]))
 
-#Converte quattro word in integer 4 bytes
 def int_double_convert(hex_a,hex_b,hex_c,hex_d):
-    #import struct
+    # Converts four words in  double u-integer
     hex_double = hex_a * 16 ** 12 + hex_b * 16 ** 8 + hex_c * 16 ** 4 + hex_d
     return int(hex_double)
 
-#Check: numero � NaN
 def isNaN(num):
+    #Check: numero is NaN
     return num != num
 
-## Drivers support functions
 
+def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
+    '''
+    Builds the device's value
 
-def build_param(pDict, # self.pDict[x],
-                idDev, # self.idDevPack['idDev'],
-                list_name, # self.rr[self.pDict[x]['idAddrList'] - 1],
-                codeError, # self.codeError_rr[self.pDict[x]['idAddrList'] - 1],
-                TimeStamp, # self.TimeStamp.strftime('%Y-%m-%d %H:%M:%S.%f'),
-                Delay, #self.Delay)
-                 ):
+    v.2.9 - 2018-11-05
+    v.3.0 - 2020-06-30
+    v.3.1 - 2020-10-29
+    v.3.2 - 2020-12-03
+    v.3.3 - 2021-01-21
+    v.3.4 - 2021-04-23
+    v.3.5 - 2022-02-02
 
-    # print('addr, idParam,list_name: {} {} {}'.format(addr, idParam,list_name))
-    # v.2.9 - 2018-11-05
-    # v.3.0 - 2020-06-30
-    # v.3.1 - 2020-10-29
-    # v.3.2 - 2020-12-03  offset
-    # v.3.3 - 2021-01-21
-    # v.3.4 - 2021-04-23
+    Paarmeters:
+    -idDev,         self.idDevPack['idDev'],
+    -list_name,     pDict.idAddrList
+    -codeError,     self.codeError_rr[self.pDict[x]['idAddrList'] - 1],
+    -TimeStamp,     self.TimeStamp.strftime('%Y-%m-%d %H:%M:%S.%f'),
+    -Delay,         self.Delay
 
-    # Estrae il valore del parametro dai registri e restituisce in formato 'dizionario'
-    # list_name : array dei registri
-    # addr        : indirizzo del valore nel registro
-    # k            : fattore moltiplicativo
-    # idDev        : identificativo del device
-    # idParam    : identificativo del parametro
-    # codeError : codice di errore in caso di mancata lettura del registro
-    # numwords    : numero di words di cui � composto il valore
+    -pDict
+            {
+            'idAddrList':   1,
+            'addr':         10,
+            'idParam':      104,
+            'k':            1,
+            'offset':       0,
+            'words':        2,
+            'type':         0,
+            }
 
     # Tipi di conversione
     # numwords ==1
@@ -98,25 +97,25 @@ def build_param(pDict, # self.pDict[x],
     #     type =3 long_convert      {+1, 0}
     #     type =4 ulong_convert     {+1, 0}
     #     type = 5  float_converter {+1, 0}
+    #
     # numwords == 4
     #      type =0 double_convert   { -1, 0 , +1 , +2 }
     #      type =1 double_convert   {  0, +1 , +2, +3 }
     #      type =2 int_double_convert   { -1, 0 , +1 , +2 }
     #
     # return    : dizionario come da Dict_Generate
+    '''
 
     num_type = pDict['type']
-    list_name = list_name
+
     addr = pDict['addr']
     k = pDict['k']
     offset = pDict['offset']
     idParam = pDict['idParam']
-    codeError = codeError
     numwords = pDict['words']
-    TimeStamp =TimeStamp
-    Delay = Delay
 
     value_ = 0
+
     try:
         len_list = len(list_name.registers)
     except:
@@ -180,17 +179,26 @@ def build_param(pDict, # self.pDict[x],
     if isNaN(value_):
         value_ = 0
         codeError += err_code['value_NaN']
-    return Dict_Generate(idDev, idParam, value_ , codeError, TimeStamp, Delay)
 
-def Dict_Generate(idDevice,idParam,Value,Code, TimeStamp,Delay):
-        #Genera un dizionario dati
-        return dict(idDevice  = str(idDevice),
+    return dict(idDevice=str(idDev),
+                idParam=str(idParam),
+                Date=TimeStamp,
+                Value=float(value_),
+                Delay=Delay,
+                Code=codeError
+                )                            #Acc.to  see000Raw table
+
+def Dict_Generate_old(idDev, idParam, value_, codeError, TimeStamp,Delay):
+        # Value's dictionary
+        # Fields as in
+
+        return dict(idDevice  = str(idDev),
                     idParam   = str(idParam),
                     Date      = TimeStamp,
-                    Value     = float(Value),
+                    Value     = float(value_),
                     Delay     = Delay,
-                    Code      = Code
-                    ) 
+                    Code      = codeError
+                    )
         
 def push_log(stringa):
     #salva su file - config_log{}
