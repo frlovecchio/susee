@@ -30,7 +30,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
-from .see_comm import c_comm_devices
+from susee.see_comm import c_comm_devices
 
 
 class c_driver_P32(c_comm_devices):

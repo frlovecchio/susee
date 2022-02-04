@@ -27,9 +27,9 @@ import mysql.connector
 import os
 import pandas as pd
 
-from .see_comm import internet2
-from .see_dict import message_strings, err_code
-from .see_functions import time_utc, push_log, utctime_to_tZone, tZone_to_utctime, time_local
+from susee.see_comm import internet2
+from susee.see_dict import message_strings, err_code
+from susee.see_functions import time_utc, push_log, utctime_to_tZone, tZone_to_utctime, time_local
 
 
 class seedatadb:
@@ -90,7 +90,7 @@ class seedatadb:
             push_log('exec_sql1() - ' + message_strings[9] + '\n err: ' + str(
                 err) + '\n sql: ' + sql)  # 'msg_09 - Database MYSQL non accessibile.'
             print('> exeq_sql1() -  DataBase Error: ', err)
-            print('> exeq_sql1() -  sql: ', sql)
+            #print('> exeq_sql1() -  sql: ', sql)
             return flag_db, str(err)
 
         if _bresult == False:
@@ -808,7 +808,6 @@ class seedatadb:
         # v3.1 2020-12-03   integrated data_store_db()
         # v3.2 2021-01-06   table
 
-        config_mysql = self.configMysql
         config_mysql_bk = self.configMysql['config_mysql_bk']
         flag_db = 0
         flag_file = 0
@@ -845,15 +844,16 @@ class seedatadb:
                 print('> data_store() - store_flag3: stored sql array to array_sql. Size: ', str(len(self.array_sql)))
         return store_flag
 
-    def write_array(self, stringa):
+    def write_array(self, sql):
         #
         # Adds a row to global array_sql with stringa
         #
         # v2.0 2020-07-04
         # v2.1 2022-012-01 - minors
 
-        self.array_sql.append(stringa)
-        return len(self.stringa)
+        self.array_sql.append(sql)
+        items = len(self.array_sql)
+        return items
 
     def write_to_file(self, file_name, stringa):
         #

@@ -34,7 +34,6 @@ Test file
 '''
 ver='1.2.3'
 
-
 import time
 import sys
 import importlib
@@ -42,6 +41,11 @@ from datetime import datetime
 from socket import *
 import copy
 import pandas as pd
+
+import susee.see_drivers
+from susee.see_functions import time_utc
+from susee.see_db import seedatadb
+
 import logging
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -52,7 +56,6 @@ logger.setLevel(logging.INFO)
 
 class cLib:
     pass
-
 
 def load_dataFile():
     #Import the data file
@@ -79,18 +82,13 @@ def load_dataFile():
         print('[msg] error: option -d missing')
         exit()
 
-clib= load_dataFile()
+cLib= load_dataFile()
 # Load custom data from custom Module cLib
 idDevices_pack = cLib.idDevices_pack
 options_ = cLib.options_
 config_mysql = cLib.config_mysql
 sample_params = cLib.sample_params
 ####################################
-
-
-from ..susee.see_drivers import c_driver_P32
-from ..susee.see_functions import time_utc
-from ..susee.see_db import seedatadb
 
 
 
@@ -155,10 +153,18 @@ def main():
     # Instruments threads
     #
     threads = []
+    driverLib_ = importlib.util.find_spec('susee.see_drivers')
+
     for i in range(num_devices):
         if idDevices_pack[i]['typeDev'] == 'P32':
-            t = c_driver_P32(idDevices_pack[i])
-            threads.append(t)
+            driver_name = 'c_driver_' + idDevices_pack[i]['typeDev']
+            spec = importlib.util.spec_from_file_location(driver_name, driverLib_.origin)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            driver_= getattr(module, driver_name)
+            print(f"---- loaded driver of device id{idDevices_pack[i]['idDev']} : {driver_.__name__}    -------------")
+        t = driver_(idDevices_pack[i])
+        threads.append(t)
 
     nDev_ = len(threads)
     print('>> Number of instances: ', nDev_)
