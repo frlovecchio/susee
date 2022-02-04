@@ -16,8 +16,8 @@ from pymodbus.client.sync import ModbusTcpClient as ModbusTCP
 import threading
 import time
 
-from .see_functions import  build_param
-from .see_dict import err_code
+from susee.see_functions import  build_param
+from susee.see_dict import err_code
 
 import logging
 
@@ -39,6 +39,7 @@ logger.setLevel(logging.INFO)
 #
 class c_comm_devices(threading.Thread):
     def __init__(self, idDevPack, *args, **kwargs):
+        super(c_comm_devices, self).__init__(*args, **kwargs)
         '''
         Example idDevPack:
             idDevices_pack = {}
@@ -53,12 +54,10 @@ class c_comm_devices(threading.Thread):
                     'enable': 1,
                 }
         '''
-
-        super(c_comm_devices, self).__init__(*args, **kwargs)
-
-        logger.info(f"__init__ {self.idDevPack['Port']}")
         self.idDevPack = idDevPack
         self.time_ = [0] * 6
+        logger.info(f"__init__ {self.idDevPack['Port']}")
+
         self.client = None
         self.addrList = {}
         self.num = 0

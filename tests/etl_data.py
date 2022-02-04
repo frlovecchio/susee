@@ -41,6 +41,7 @@ sample_params = {
 
 # List of devices
 idDevices_pack = {}
+
 idDevices_pack[0] = {
     'typeDev': 'P32',
     'idDev': 'd00',
@@ -54,13 +55,13 @@ idDevices_pack[0] = {
 
 idDevices_pack[1] = {
     'typeDev': 'P33',
-    'idDev': 'd00',
+    'idDev': 'd01',
     'method': 'tcp',
-    'ipAddr_COM': '192.168.1.100',
+    'ipAddr_COM': '192.168.1.101',
     'idAddr': 1,
     'Port': '502',
     'timeout': 1,
-    'enable': 0,
+    'enable': 1,
 }
 
 # Opzioni
