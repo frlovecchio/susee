@@ -54,7 +54,7 @@ idDevices_pack[0] = {
 }
 
 idDevices_pack[1] = {
-    'typeDev': 'P33',
+    'typeDev': 'P32',
     'idDev': 'd01',
     'method': 'tcp',
     'ipAddr_COM': '192.168.1.101',

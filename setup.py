@@ -5,7 +5,7 @@ with open('README.md', "r") as fh:
 
 setuptools.setup(
     name="susee",
-    version='1.6',
+    version='1.6.1',
     author="ing. F.S. Lovecchio, ph.D - Bari, Italy",
     author_email="frlovecchio@outlook.it",
     description="suSEE - Energy Monitoring Platform",

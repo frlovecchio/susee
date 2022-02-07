@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Test file 
 '''
 ver = '1.6 - 2022-02-07'
+ver = '1.7 - 2022-02-07'
 
 import time
 import sys
@@ -42,11 +43,11 @@ from socket import *
 import copy
 import pandas as pd
 
-import susee.see_drivers
 from susee.see_functions import time_utc
 from susee.see_db import seedatadb
 
 import logging
+
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -54,86 +55,45 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-class cLib:
-    pass
 
-def load_dataFile():
-    #Import the data file
-    #v1.0 2022-01-29
-
-    #
-    # Option: -d name_datafile.py
-    #
-    if len(sys.argv) > 1:
-        if sys.argv[1] == '-d':
-            customLib = ''
-            try:
-                customLib = sys.argv[2]
-                if customLib[-3:] == '.py':
-                    customLib = customLib[:-3]
-                return importlib.import_module(customLib, package=None)
-            except:
-                print(f"[msg] - error: custom data file: '{customLib}' not found")
-                exit()
-        else:
-            print('[msg] - error: option -d missing')
-            exit()
-    else:
-        print('[msg] error: option -d missing')
-        exit()
-
-cLib= load_dataFile()
-# Load custom data from custom Module cLib
-idDevices_pack = cLib.idDevices_pack
-options_ = cLib.options_
-config_mysql = cLib.config_mysql
-sample_params = cLib.sample_params
-####################################
-
-
-
-
-def filter_devices(pack):
-    #Filters  enabled devices
-    #v1.0 2022-01-29
-    pack1={}
-    xx=0
-    for x in pack.keys():
-        if pack[x]['enable']:
-            pack1[xx]=pack[x]
-            xx += 1
-    return pack1
-
-#
-#Reads devices dataframe
-idDevices_pack = filter_devices(idDevices_pack)
-num_devices = len(idDevices_pack)
-
-if num_devices == 0:
-    print('-' * 60)
-    print(' -  - - -  - - - WARNING: NO DEVICES TO READ ! - - - - - - - - ')
-    print('-' * 60)
-    exit()
-else:
-    print('-' * 60)
-    print(' -  - - -  - - - N. %s DEVICES TO READ  - - - - - - - - ' % (str(num_devices)))
-    print('-' * 60)
-
-# Storage
-c000 = seedatadb(config_mysql)
-
+# class cLib:
+#    pass
 
 def main():
+    #  - Load custom data from custom Module cLib
+    cLib = load_dataFile()
+    idDevices_pack = cLib.idDevices_pack
+    options_ = cLib.options_
+    config_mysql = cLib.config_mysql
+    sample_params = cLib.sample_params
+    ###################################################
 
-    # Messages
+    #   - Filter devices dataframe
+    idDevices_pack = filter_devices(idDevices_pack)
+    num_devices = len(idDevices_pack)
+    if num_devices == 0:
+        print('-' * 60)
+        print(' -  - - -  - - - WARNING: NO DEVICES TO READ ! - - - - - - - - ')
+        print('-' * 60)
+        exit()
+    else:
+        print('-' * 60)
+        print(' -  - - -  - - - N. %s DEVICES TO READ  - - - - - - - - ' % (str(num_devices)))
+        print('-' * 60)
+    ####################################################
+
+    #   - Messages
     print('-' * 80)
+    print('--- SUSEE - Energy Management System Platform     --- ')
+    print('------------------------------------------------------ ')
+    print('')
     print('--- Studio Tecnico Pugliautomazione - Bari, Italy --- ')
     print('--- eng. Francesco Saverio Lovecchio, ph.D.       --- ')
-    print('    ETL Tool %s ' % ver)
-    print('    UTC Data: %s ' % (time_utc()))
+    print('--- ETL Tool %s ' % ver)
+    print('--- UTC Data: %s ' % (time_utc()))
     print('-' * 80)
-    dataToStore_ = {}
-
+    print('')
+    print('')
 
     if options_['Messages']:
         print('>> Devices: ', num_devices)
@@ -145,6 +105,9 @@ def main():
         print('>> Database: ', config_mysql['host'])
         print('-' * 40)
 
+    print('')
+    print('')
+
     # check and close open ports
     print(' - - - Check open ports   - - - ')
     check_OpenPorts(idDevices_pack)
@@ -152,20 +115,18 @@ def main():
     # CHECK
     # Instruments threads
     #
-    threads = []
-    driverLib_ = importlib.util.find_spec('susee.see_drivers')
 
+
+
+    #   - Load devices Drivers
+    threads = []
     for i in range(num_devices):
-        if idDevices_pack[i]['typeDev'] == 'P32':
-            driver_name = 'c_driver_' + idDevices_pack[i]['typeDev']
-            spec = importlib.util.spec_from_file_location(driver_name, driverLib_.origin)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            driver_= getattr(module, driver_name)
-            print(f"---- loaded driver of device id{idDevices_pack[i]['idDev']} : {driver_.__name__}    -------------")
+        driver_ = load_driver_method('susee.see_drivers', idDevices_pack[i]['typeDev'])
         t = driver_(idDevices_pack[i])
         threads.append(t)
 
+    print('')
+    print('')
     nDev_ = len(threads)
     print('>> Number of instances: ', nDev_)
     if nDev_ == 0:
@@ -174,40 +135,44 @@ def main():
         print('-' * 60)
         exit()
 
-    # 1. Setup
+    # - Setup connection
     for t in threads:
         t.open_conn()
-
+    print('')
+    print('')
     print(' - - - - - Status open ports   - - - ')
     for i, t in enumerate(threads):
         print([i, t.idDevPack['idDev'], t.client.connect()])
-
     if options_['threads']:
         for t in threads:
-            # Read Registers
-            # t.daemon = False
             t.start()
 
+    ####################################################################################
+
+    print('')
+    print('')
+
+
+
     #
-    # 0. Endless loop of samples
+    # 0. Mode - Endless loop of samples
     #
     if sample_params['sampleType'] == 0:
-        print('-' * 40)
-        print('-' * 10 + '  0.  Endless Number of Samples Mode  ' + '-' * 10)
+        print('-' * 80)
+        print('-' * 10 + '  0. Mode - Endless Number of Samples Mode  ' + '-' * 20)
 
-        # Infinite loop
+        # Infinite loop time
         maxSample = 10 ** 10
 
         flag_fastStorage = True
         sync_cycle = True
 
     #
-    # 1. Finite number of  samples -  sync cycle
+    # 1. Mode - Finite number of  samples -  sync cycle
     #
     elif sample_params['sampleType'] == 1:
-
         print('-' * 40)
-        print('-' * 10 + '  1.  Fixed Number of Samples Mode  ' + '-' * 10)
+        print('-' * 10 + '  1. Mode -  Fixed Number of Samples Mode  ' + '-' * 10)
         # Input Loop control: number of cycles
         maxSample = int(input('Input number of cycles: '))
 
@@ -237,14 +202,16 @@ def main():
     flag_tempfileBk = False
     flag_tempArrayBk = False
     to_sampleTime_old = 0
+    dataToStore_ = {}
+
+    c000 = seedatadb(config_mysql)  # - Class Storage Management
 
     # Loop for both options 0, 1
     while n < maxSample:
-        # Check time trigger
-
+        # Check sample trigger
         flag_sample, TimeNow, flag_old, TimeNow_ns, to_sampleTime = sampleFlag_(sample_params, flag_old)
 
-        # OFF-SAMPLE
+        # OFF-SAMPLE Time
         # Activites:
         #   1.     tempArrayBk
         #   2.     tempfileBk
@@ -421,6 +388,67 @@ def main():
         print('-' * 10 + '   Done    ' + '-' * 10)
 
 
+#
+#   - Functions
+#
+def load_driver_method(driver_pack_name, driver_name):
+    # Loads device's driver
+    # v1.0  2022-02-07
+
+    '''
+    Inputs:
+        driver_pack_name = 'susee.see_drivers'
+        driver_name = 'P32'
+    '''
+
+    try:
+        driverLib_ = importlib.util.find_spec(driver_pack_name)
+        driver_name = 'c_driver_' + driver_name
+        spec = importlib.util.spec_from_file_location(driver_name, driverLib_.origin)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        driver_ = getattr(module, driver_name)
+        print(f"---- loaded driver of device id '{driver_name}' . driver name:  {driver_.__name__}   -------------")
+    except Exception as exc:
+        raise RuntimeError(f"[msg] - Driver of device id {driver_name} not found ") from exc
+    return driver_
+
+def filter_devices(pack):
+    # Filters  enabled devices
+    # v1.0 2022-01-29
+    pack1 = {}
+    xx = 0
+    for x in pack.keys():
+        if pack[x]['enable']:
+            pack1[xx] = pack[x]
+            xx += 1
+    return pack1
+
+def load_dataFile():
+    # Import the data file
+    # v1.0 2022-01-29
+
+    #
+    # Option: -d name_datafile.py
+    #
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '-d':
+            customLib = ''
+            try:
+                customLib = sys.argv[2]
+                if customLib[-3:] == '.py':
+                    customLib = customLib[:-3]
+                return importlib.import_module(customLib, package=None)
+            except:
+                print(f"[msg] - error: custom data file: '{customLib}' not found")
+                exit()
+        else:
+            print('[msg] - error: option -d missing')
+            exit()
+    else:
+        print('[msg] error: option -d missing')
+        exit()
+
 def sample_data(TimeNow_ns, devInstance_):
     # Store DATA
     # v1.0 2020-09-27
@@ -458,9 +486,8 @@ def check_OpenPorts(idDevices_pack):
 
 def sampleFlag_(sample_params, flag_old):
     # Sample flag
-    # v 1.1 2020-09-26
-    import time
-    # Time
+    # v.1.1 2020-09-2
+    # v.1.2 2022-02-07
 
     TimeNow_ns = time.time_ns()
     TimeNow = datetime.fromtimestamp(TimeNow_ns * 10 ** -9)
@@ -492,11 +519,13 @@ def sampleFlag_(sample_params, flag_old):
 def t_to_DateTime(tt):
     # Convert time_ns() to DateTime
     # v0.0 2020-09-27
+
     t1 = datetime.fromtimestamp(tt * 10 ** -9)
     return t1.strftime('%Y-%m-%d %H:%M:%S.%f')
 
 def time_report(_dataToStore):
     # v1.0  2020-09-28
+
     s_ = len(_dataToStore)  # samples
     d_ = len(_dataToStore[0])  # devices
     tab_ = []
@@ -509,25 +538,18 @@ def time_report(_dataToStore):
                     'sample ' + str(i + 1),
                     t_to_DateTime(_dataToStore[i][ii]['sampleTime']),
                     _dataToStore[i][ii]['idDevice'],
-                    # (_dataToStore[i][ii]['time_array'][2] - _dataToStore[i][ii]['sampleTime'])*k_,    #connDelay
                     (_dataToStore[i][ii]['time_array'][1] - _dataToStore[i][ii]['time_array'][0]) * k1_,  # connTime
-                    # (_dataToStore[i][ii]['time_array'][2] - _dataToStore[i][ii]['time_array'][1])*k1_, #rrDelay
                     (_dataToStore[i][ii]['time_array'][3] - _dataToStore[i][ii]['time_array'][2]) * k1_,  # rrTIme
-                    # (_dataToStore[i][ii]['time_array'][4] - _dataToStore[i][ii]['time_array'][3])*k1_, #vDelay
                     (_dataToStore[i][ii]['time_array'][5] - _dataToStore[i][ii]['time_array'][4]) * k1_,  # buildTime
                     [_dataToStore[i][ii]['rr_dtime'][iii] * k1_ for iii in range(len(_dataToStore[i][ii]['rr_dtime']))],
-                    # rr_dtime
                 ]
             )
         df = pd.DataFrame(tab_,
                           columns=['idSample',
                                    'DateTime',
                                    'idDev',
-                                   # 'connDelay[ms]',
                                    'connTime[ms]',
-                                   # 'rrDelay[ms]',
                                    'rrTime[ms]',
-                                   # 'vDelay[ms]',
                                    'buildTime[ms]',
                                    'rr_dtime[ms]'
                                    ])
@@ -560,7 +582,14 @@ def sync_report(_dataToStore):
                                    'syncTime[ms]'])
     return df
 
-
+#
 if __name__ == "__main__":
-    # main()
-    main()
+    try:
+        main()
+    except KeyboardInterrupt or KeyError:
+        print(' - Python script keyboard interrupted ')
+        try:
+            sys.exit(0)
+        except Exception as exc:
+            raise RuntimeError(f"[msg] - Script stopped") from exc
+
