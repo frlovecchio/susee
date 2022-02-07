@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 Test file 
 '''
-ver='1.2.3'
+ver = '1.6 - 2022-02-07'
 
 import time
 import sys
