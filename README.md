@@ -1,4 +1,4 @@
-Su.S.E.E. - SUpervisor System for Energy Efficiency
+Su.S.E.E. - Supervisor System for Energy Efficiency
 
 ------------- Energy Management System -----------------
 
@@ -43,7 +43,6 @@ Usage
   - Default jobID: 000 
   - Default Database name: seedb000
   - Tables: see000Raw, see000Last, see000Params
-
 
 
     n.   Table          Description
