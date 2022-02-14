@@ -9,6 +9,7 @@
 # 2021-03-11  v3.3  rs485 try connection
 # 2021-03-18  v3.4  stop thread option
 # 2022-02-02  v3.5
+# 2022-02-14  v3.6
 
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusRTU
@@ -20,7 +21,6 @@ from susee.see_functions import  build_param
 from susee.see_dict import err_code
 
 import logging
-
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -65,6 +65,7 @@ class c_comm_devices(threading.Thread):
         self.sync_ = True
         self.stop = False
         self.TimeStamp_ns = time.time_ns()  # time reference of sample: "sampling time".
+        self.TimeNow = '' #datetime.fromtimestamp(self.TimeStamp_ns * 10 ** -9)
         self.pDict = {}
 
     def setup_regs(self):
@@ -245,10 +246,11 @@ class c_comm_devices(threading.Thread):
 
         self.time_[5] = time.time_ns()  # time AFTER data format
 
-def internet2():
+def internet_ip():
     # v2.0 2020-03-22
-    # check if host/port is open
+    # check if host/port is open and returns machine ip address
     # https://stackoverflow.com/questions/3764291/checking-network-connection
+    # 2022-02-14 renamed internet2()
 
     import socket
     ipaddress = socket.gethostbyname(socket.gethostname())

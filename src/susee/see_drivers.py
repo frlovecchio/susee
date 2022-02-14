@@ -18,10 +18,9 @@
 # v2.7 2022-01-24 P32
 
 
+from susee.see_comm import c_comm_devices
 
 import logging
-
-
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -29,8 +28,6 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-
-from susee.see_comm import c_comm_devices
 
 
 class c_driver_P32(c_comm_devices):
@@ -55,11 +52,10 @@ class c_driver_P32(c_comm_devices):
         self.addrList = {}
         self.addrList[1] = (1, 83)
         self.addrList[2] = (801, 837)
-        #pDict
         self.paramDict()
 
     def paramDict(self):
-        # Elaborazione registri - valori
+        # Parameters format
 
         numPar = -1
         addrList=  self.addrList

@@ -8,7 +8,7 @@
 # v2.1 2020-12-29   swap_convert()
 # v2.2 2020-12-29   fixed offset
 # v2.3 2021-04-23
-# v2.4 2021-0515
+# v2.4 2021-05-15
 
 import struct
 import os
@@ -16,9 +16,9 @@ import pytz
 from datetime import datetime
 from susee.see_dict import err_code
 
-##############################
-###  Format Conversions Functions ######
-##############################
+#----------------------------------------------
+#       Format Conversions Functions
+#----------------------------------------------
 def ulongswap_convert(hexa, hexb):
     hh = hexa * 16 ** 4 + hexb
     #print('hexa,hexb, hh, int(hh): {} {} {} {} '.format(hexa,hexb, hh, int(hh) ))
@@ -70,12 +70,12 @@ def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
 
     Paarmeters:
     -idDev,         self.idDevPack['idDev'],
-    -list_name,     pDict.idAddrList
+    -list_name,     pDict.idAddrList{}
     -codeError,     self.codeError_rr[self.pDict[x]['idAddrList'] - 1],
     -TimeStamp,     self.TimeStamp.strftime('%Y-%m-%d %H:%M:%S.%f'),
     -Delay,         self.Delay
 
-    -pDict
+    -pDict[x] example
             {
             'idAddrList':   1,
             'addr':         10,
@@ -96,12 +96,12 @@ def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
     #     type =2 longswap_convert  {0 , 1}
     #     type =3 long_convert      {+1, 0}
     #     type =4 ulong_convert     {+1, 0}
-    #     type = 5  float_converter {+1, 0}
+    #     type =5 float_converter   {+1, 0}
     #
     # numwords == 4
-    #      type =0 double_convert   { -1, 0 , +1 , +2 }
-    #      type =1 double_convert   {  0, +1 , +2, +3 }
-    #      type =2 int_double_convert   { -1, 0 , +1 , +2 }
+    #      type =0 double_convert      { -1, 0 , +1 , +2 }
+    #      type =1 double_convert      {  0, +1 , +2, +3 }
+    #      type =2 int_double_convert  { -1, 0 , +1 , +2 }
     #
     # return    : dizionario come da Dict_Generate
     '''
