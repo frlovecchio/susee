@@ -152,8 +152,6 @@ def main():
     print('')
     print('')
 
-
-
     #
     # 0. Mode - Endless loop of samples
     #
@@ -232,7 +230,7 @@ def main():
 
         # Sampling time
         if flag_sample:
-            n += 1
+            n += 1  # increase sample counter
             # Enable off sample activities
             flag_tempfileBk = True
             flag_tempArrayBk = True
