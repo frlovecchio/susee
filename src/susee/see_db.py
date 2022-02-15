@@ -20,16 +20,17 @@
 # v3.3 2021-06-08
 # v3.4 2021-07-05
 # v3.5 2022-02-01
+# v3.6 2022-02-14
 
 
-from datetime import timedelta, datetime
+from datetime import datetime
 import mysql.connector
 import os
 import pandas as pd
 
-from susee.see_comm import internet2
-from susee.see_dict import message_strings, err_code
-from susee.see_functions import time_utc, push_log, utctime_to_tZone, tZone_to_utctime, time_local
+from susee.see_comm import internet_ip
+from susee.see_dict import message_strings
+from susee.see_functions import time_utc, push_log, utctime_to_tZone, tZone_to_utctime
 
 
 class seedatadb:
@@ -48,7 +49,7 @@ class seedatadb:
         # self.dfDevPar = pd.DataFrame()  # used to temp store df for SysRawData
 
         # check socket if available. 1=ok, -1=none
-        self.db_connect = internet2()
+        self.db_connect = internet_ip()
 
     # Tools
     def exec_sql1(self, sql, _bresult):
@@ -90,7 +91,7 @@ class seedatadb:
             push_log('exec_sql1() - ' + message_strings[9] + '\n err: ' + str(
                 err) + '\n sql: ' + sql)  # 'msg_09 - Database MYSQL non accessibile.'
             print('> exeq_sql1() -  DataBase Error: ', err)
-            #print('> exeq_sql1() -  sql: ', sql)
+            # print('> exeq_sql1() -  sql: ', sql)
             return flag_db, str(err)
 
         if _bresult == False:
@@ -102,12 +103,6 @@ class seedatadb:
             out_sql = cursor.fetchall()
             cnx.close()
             cursor.close()
-            try:
-                len(out_sql) > 0
-                flag_db = True
-            except:
-                pass
-
             return out_sql, '0'
 
     #
@@ -157,12 +152,15 @@ class seedatadb:
         # Reads actual data from
         # v2.0 2020-07-07
         # v2.1 2022-02-01
+        # v2.2 2022-02-14
 
         sql_ = "select date, idDevice, idParam, value,  Code, Delay  from {0}.{1}  where idDevice='{2}' and idParam= '{3}'; ".format(
             self.configMysql['database'],
             self.configMysql['tableLast'],
             idDevice,
             idParam)
+
+        db_1 = pd.DataFrame([0])
 
         if idDevice == 'All':
             sql_ = sql_.replace('idDevice=', 'idDevice!=')
@@ -172,17 +170,14 @@ class seedatadb:
 
         if self.db_connect:
             out_, _ = self.exec_sql1(sql_, True)  # format [(par1, par2,...)]
+            db_1 = pd.DataFrame(data=out_,
+                                columns=['DateTime', 'idDevice', 'idParam', 'Value', 'Code', 'Delay'],
+                                )
         else:
             str_ = '[msg] dataDB_seeLast_read() - no web connection'
             push_log(str_)
 
-        return pd.DataFrame(data=out_,
-                            columns=['DateTime', 'idDevice', 'idParam', 'Value', 'Code', 'Delay'],
-                            )
-
-    #
-    #
-    #
+        return db_1
 
     #
     # Generic Table read/write
@@ -238,7 +233,6 @@ class seedatadb:
         sql2 = sql2.replace('((', '(')
         sql2 = sql2.replace('))', ')')
         sql2 = sql2.replace('),);', ');')
-        sql2
         sql1 += sql2
 
         flagdb, err = self.exec_sql1(sql1, 0)
@@ -327,6 +321,8 @@ class seedatadb:
         # v2.1 2022-02-01
 
         # Read RAW Data
+
+        df = pd.DataFrame()
         df, err = self.dataDB_seeRaw_read(load_data)
 
         if len(df) == 0:
@@ -357,14 +353,14 @@ class seedatadb:
             df1 = df1[df1['Code'] == load_data['code']]
 
         # Shift time
-        #if load_data['shiftStep'] != 0:
+        # if load_data['shiftStep'] != 0:
         #    df1.index = df1.index.to_period(load_data['timeStep']) + load_data['shiftStep']
         #    df1.index = df1.index.to_timestamp(load_data['timeStep'])  # riconversione index in timestamp per plot
 
         # Drops duplicated  - filter for DST time shifts
         df1 = df1[~df1.index.duplicated(keep='first')]
 
-        #Creates pivot table
+        # Creates pivot table
         pivot_ = df1.reset_index().pivot(
             index='DateTime',
             columns='idxPar',
@@ -410,7 +406,6 @@ class seedatadb:
 
         return flagdb
 
-
     #
     # Table see000Params read
     #
@@ -418,42 +413,48 @@ class seedatadb:
         # Reads Parameters Table data
         # v1.0 2020-07-07
         # v1.1 2022-02-01
+        # v1.2 2022-02-14
 
-        sql_ = "select  idParam, {3}, um, Acronimo from {0}.{1}  " \
-               "where idParam='{2}'; ".format(
-                self.configMysql['database'],
-                self.configMysql['tableParams'],
-                idParam,
-                'descr' + self.configMysql['language'],
-                )
+        db_1 = pd.DataFrame([0])
+
+        sql_ = '''
+                select idParam, {3}, um, Acronimo from {0}.{1}  
+                where idParam='{2}';
+               '''.format(
+            self.configMysql['database'],
+            self.configMysql['tableParams'],
+            idParam,
+            'descr' + self.configMysql['language'],
+        )
 
         if idParam == 'All':
             sql_ = sql_.replace('idParam=', 'idParam!=')
 
         if self.db_connect:
             out_, _ = self.exec_sql1(sql_, True)  # format [(par1, par2,...)]
+            db_1 = pd.DataFrame(data=out_,
+                                columns=['idParam', 'paramDescr', 'um', 'Acronimo'],
+                                )
         else:
             str_ = '[msg] dataDB_seeParams_read() - no web connection'
             push_log(str_)
 
-        db_1 = pd.DataFrame(data=out_,
-                            columns=['idParam', 'paramDescr', 'um', 'Acronimo'],
-                            )
         return db_1
-
 
     #
     # Table see000Mac read
     #
     def dataDB_seeMac_read(self, idMac):
         # Reads MAchine  Table data
-        # v1.0 2020-07-07
+        #   v1.0    2020-07-07
+        #   v1.1    2022-02-14
 
+        db_1 = pd.DataFrame([0])
         sql_ = "select  idMac, descrLANG  from {0}.{1}  " \
                "where idMac= '{2}'; ".format(
-            self.configMysql['database'],
-            self.configMysql['tableMac'],
-            idMac)
+                                        self.configMysql['database'],
+                                        self.configMysql['tableMac'],
+                            idMac)
 
         sql_ = sql_.replace('descrLANG', 'descr' + self.configMysql['language'])
 
@@ -462,13 +463,13 @@ class seedatadb:
 
         if self.db_connect:
             out_, _ = self.exec_sql1(sql_, True)  # format [(par1, par2,...)]
+            db_1 = pd.DataFrame(data=out_,
+                                columns=['idMac', 'machDescr'],
+                                )
         else:
             str_ = '[msg] dataDB_seeParams_read() - no web connection'
             push_log(str_)
 
-        db_1 = pd.DataFrame(data=out_,
-                            columns=['idMac', 'machDescr'],
-                            )
         return db_1
 
     #
@@ -476,8 +477,10 @@ class seedatadb:
     #
     def dataDB_seeDep_read(self, idDep):
         # Reads Departments  Table data
-        # v1.0 2020-07-07
+        # v1.0  2020-07-07
+        # v1.1  2022-02-14
 
+        db_1 = pd.DataFrame([0])
         sql_ = "select  idDep, descrLANG  from {0}.{1}  " \
                "where idDep='{2}'; ".format(
             self.configMysql['database'],
@@ -491,13 +494,13 @@ class seedatadb:
 
         if self.db_connect:
             out_, _ = self.exec_sql1(sql_, True)  # format [(par1, par2,...)]
+            db_1 = pd.DataFrame(data=out_,
+                                columns=['idDep', 'depDescr'],
+                                )
         else:
             str_ = '[msg] dataDB_seeDep_read() - no web connection'
             push_log(str_)
 
-        db_1 = pd.DataFrame(data=out_,
-                            columns=['idDep', 'depDescr'],
-                            )
         return db_1
 
     #
@@ -508,6 +511,9 @@ class seedatadb:
         # v1.0 2020-10-25
         # v2.0 2021-05-12
         # v2.1 2022-02-01
+        # v2.2 2022-02-14
+
+        db_1 = pd.DataFrame([0])
 
         if type == 'Raw':
             table_ = self.configMysql['tableSysRaw']
@@ -518,7 +524,7 @@ class seedatadb:
         if self.db_connect:
             db_1, _ = self.dataDB_Table_read(self.configMysql['tableSysRaw'])
         else:
-            db_1 = pd.DataFrame([0])
+
             str_ = 'dataDB_seeSysRaw_read() - no database connection'
             push_log(str_)
 
@@ -570,7 +576,7 @@ class seedatadb:
         # t_Articoli = config_mysql['tableArt']   # idArt, idParams, Description
 
         # METHOD Merge tables 1 - merge tables
-        test_=False
+        test_ = False
         if test_:
             # Read table contents
             ArtJob = self.dataDB_Table_read(t_jArtJob)[0]
@@ -578,7 +584,7 @@ class seedatadb:
             DepMac = self.dataDB_Table_read(t_jDepMac)[0]
             MacDev = self.dataDB_Table_read(t_jMacDev)[0]
 
-            #tableArt
+            # tableArt
             df0 = pd.merge(ArtJob, JobDep, how='left', on='idJob')
             df0 = pd.merge(df0, DepMac, how='left', on='idDep')
             df0 = pd.merge(df0, MacDev, how='left', on='idMac')
@@ -762,10 +768,10 @@ class seedatadb:
         # v2.0 2021-01-06
 
         len_pack = len(dataPack)
-        store_flag = [0] * len_pack
+        store_flag = []
 
         for i in range(len_pack):
-            store_flag[i] = self.data_store(dataPack[i], table_)
+            store_flag.append(self.data_store(dataPack[i], table_))
         return store_flag
 
     def data_store_db(self, param_list, table_, **kwargs):
@@ -811,14 +817,14 @@ class seedatadb:
         config_mysql_bk = self.configMysql['config_mysql_bk']
         flag_db = 0
         flag_file = 0
-        store_flag = 0
+        filename = ''
         # storage flag
         #     0=none
         #     1=Mysql
         #     2=file
         #     3=array
 
-        db_connect = internet2()
+        db_connect = internet_ip()
         sql_ = '[msg] see_db.data_store() - error: no internet connection'
         # print('dbconnect', db_connect)
 
@@ -936,4 +942,3 @@ class seedatadb:
             txt_ = '[msg] - dataDB_seeTab_y: 2. new table {0} created.'.format(seeTab_)
             print(txt_)
             push_log(txt_)
-

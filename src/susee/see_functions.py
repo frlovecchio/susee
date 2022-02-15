@@ -68,7 +68,7 @@ def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
     v.3.4 - 2021-04-23
     v.3.5 - 2022-02-02
 
-    Paarmeters:
+    Parameters:
     -idDev,         self.idDevPack['idDev'],
     -list_name,     pDict.idAddrList{}
     -codeError,     self.codeError_rr[self.pDict[x]['idAddrList'] - 1],
@@ -186,20 +186,11 @@ def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
                 Value=float(value_),
                 Delay=Delay,
                 Code=codeError
-                )                            #Acc.to  see000Raw table
+                )
 
-def Dict_Generate_old(idDev, idParam, value_, codeError, TimeStamp,Delay):
-        # Value's dictionary
-        # Fields as in
-
-        return dict(idDevice  = str(idDev),
-                    idParam   = str(idParam),
-                    Date      = TimeStamp,
-                    Value     = float(value_),
-                    Delay     = Delay,
-                    Code      = codeError
-                    )
-        
+#
+# Log
+#
 def push_log(stringa):
     #salva su file - config_log{}
     #con datetime
@@ -229,41 +220,8 @@ def push_log(stringa):
             f.write(stringa)
             f.close()
             file_ok = True
-    return  file_ok   
-
-#Gestione Threads
-import  threading
-class MyThread(threading.Thread):
-    #v2.0 2020-09-21
-    def _init__(self, group, func , name, *args): #, **kwargs):
-        threading.Thread.__init__(self)
-        self.name = name    
-        self.func = func
-        self.args = args if args is not None else []
-        #self.kwargs = kwargs if kwargs is not None else {}
-        self._stop_event = threading.Event()
-        #print('-> name: {}, func: {} ,args: {}'.format(name, func,args ))
-
-    def run(self, *args):
-        try:
-            self.res = self.func(*self.args, *args)
-        except:
-            pass
-
-    def getResults(self):
-        try:
-            return self.res
-        except:
-            return {}, 1, datetime.now()
-
-    def stop(self):
-        self._stop_event.set()
-
-    def stopped(self):
-        return self._stop_event.is_set()
-
-
-#Web Server sockets
+    return  file_ok
+# Web socket
 def MyWebServer():
     print('Starting web server ....')
     import http.server
@@ -272,43 +230,45 @@ def MyWebServer():
     Handler = http.server.SimpleHTTPRequestHandler
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("m597 webserver serving at port", PORT)
-        httpd.serve_forever()  
-
+        httpd.serve_forever()
 def push_webfile(testo):
-    #testo  multiriga
-    #Moduli
-    filename    = 'index.htm'
-    f=[]
+    # testo  multiriga
+    # Moduli
+    filename = 'index.htm'
+    f = []
     file_ok = True
-    stringa=[]
-    
-    TimeNow =str(time_utc())
+    stringa = []
+
+    TimeNow = str(time_utc())
     stringa.append('<html>')
-    stringa.append('<body>'+'<br />')
-    stringa.append('Lettura strumenti sistema di monitoraggio - '+TimeNow +' - '+'<br />')
-    stringa.append('-'*150+'<br />'+'<br />')    
+    stringa.append('<body>' + '<br />')
+    stringa.append('Lettura strumenti sistema di monitoraggio - ' + TimeNow + ' - ' + '<br />')
+    stringa.append('-' * 150 + '<br />' + '<br />')
     for i in range(len(testo)):
-        stringa.append(testo[i]+'<br />')
-    
+        stringa.append(testo[i] + '<br />')
+
     stringa.append('<body>')
     stringa.append('<html>')
 
-
     if os.path.isfile(filename) | 1:
         try:
-            f=open(filename,'w')
-        except os.error: # as err:
+            f = open(filename, 'w')
+        except os.error:  # as err:
             file_ok = False
-            print('Impossibile creare il file:',filename)
+            print('Impossibile creare il file:', filename)
         else:
             for i in range(len(stringa)):
                 f.write(stringa[i])
             f.close()
             file_ok = True
 
-    return  file_ok
+    return file_ok
 
-#tools
+
+
+#
+# Time Tools
+#
 def time_utc():
     UTC = pytz.utc
     dt = datetime.now(UTC)
@@ -317,7 +277,6 @@ def time_utc():
 def time_local(tZone):
     #Time zone accordint to the timeZone
     #v1.0 2020-07-26
-
     IST = pytz.timezone(tZone)
     dt = datetime.now(IST)
     return dt
@@ -346,14 +305,12 @@ def utctime_to_tZone(utc_str_date, tZone):
             print('nok_str utctime_to_tZone. utc_time:', utc_str_date)
             return utc_str_date
 
-
 def tZone_to_utctime(str_date, tZone):
     # Convert a UTC time to local time
     # v1.0 2020-04-25 - from timezone to utc
     # v2.0 2021-05-15
     # n.b.  pytz.timezone('Europe/Rome')  --> <DstTzInfo 'Europe/Rome' LMT+0:50:00 STD>
-    #
-
+    # v2.1 2022-02-15
 
     local_now = datetime.now()
     diff_local_utc = utctime_to_tZone(local_now, tZone) - local_now
@@ -362,28 +319,31 @@ def tZone_to_utctime(str_date, tZone):
         try:
             #str_date = str_date.replace(tzinfo=pytz.timezone(tZone)).astimezone(tz=tz).strftime('%Y-%m-%d %H:%M:%S')
             #str_date = datetime.strptime(str(str_date).split('+')[0], '%Y-%m-%d %H:%M:%S')
-            str_date = str_date - diff_local_utc
-            return str_date.strftime( '%Y-%m-%d %H:%M:%S')
+            str_date = str_date - diff_local_utc  #v2.1 2022-02-15
+            return str_date.strftime('%Y-%m-%d %H:%M:%S')
         except:
             print('[msg] nok_time utctime_to_tZone. utc_time:', str_date)
             return str_date
 
     if 'str' in str(type(str_date)):
         try:
-            str_date = datetime.strptime(str_date, '%Y-%m-%d %H:%M:%S')
+            #str_date = datetime.strptime(str_date, '%Y-%m-%d %H:%M:%S')
             #str_date = str_date.replace(tzinfo=pytz.timezone(tZone)).astimezone(tz=tz).strftime( '%Y-%m-%d %H:%M:%S')
-            str_date = str_date - diff_local_utc
-            return str_date.strftime( '%Y-%m-%d %H:%M:%S')
+            str_date = str_date - diff_local_utc #v2.1 2022-02-15
+            return str_date.strftime('%Y-%m-%d %H:%M:%S')
         except:
             print('> nok_str utctime_to_tZone. utc_time:', str_date)
             return str_date
 
+#
+# Datetime attributes
+#
 def datetime_to_F123(date_):
     #Categorize a date according to F1,F2, F3 time period
     #and quaterly of hour
-    #2020-04-27
-    #v1.0
-    #date_ = datetime()
+    # date_ strimg format  '%Y-%m-%d %H:%M:%S' or datetime
+    #   v1.0    2020-04-27
+    #   v1.1    2022-02-15
 
     if 'str' in str(type(date_)):
         date_ = datetime.strptime(date_, '%Y-%m-%d %H:%M:%S')
@@ -396,21 +356,31 @@ def datetime_to_F123(date_):
     dateHour    = date_.hour
     date_YMD =   datetime(dateYear, dateMonth, dateDay)
 
+    # Holydays
     x = dateYear
     noWdays =  [datetime(x,1,1)]
-    noWdays += [datetime(x,1,6) ]
-    noWdays += [datetime(x,4,25) ]
-    noWdays += [datetime(x,5,1) ]
-    noWdays += [datetime(x,6,2) ]
-    noWdays += [datetime(x,8,15) ]
-    noWdays += [datetime(x,11,1) ]
+    noWdays += [datetime(x,1,6)]
+    noWdays += [datetime(x,4,25)]
+    noWdays += [datetime(x,5,1)]
+    noWdays += [datetime(x,6,2)]
+    noWdays += [datetime(x,8,15)]
+    noWdays += [datetime(x,11,1)]
     noWdays += [datetime(x,12,8) ]
-    noWdays += [datetime(x,12,25) ]
+    noWdays += [datetime(x,12,25)]
     noWdays += [datetime(x,12,26)]
-    noWdays += [datetime(2020,4,21), datetime(2020,4,22)]
-    noWdays += [datetime(2021,4,4), datetime(2021,4,25)]
+    # Pasquetta
+    noWdays += [datetime(2020,4,22)]
+    noWdays += [datetime(2021,4,5)]
+    noWdays += [datetime(2022,4,18)]
+    noWdays += [datetime(2023,4,10)]
+    noWdays += [datetime(2024,1,4)]
+    noWdays += [datetime(2025,4,21)]
+    noWdays += [datetime(2026,4,96)]
+    noWdays += [datetime(2027,4,29)]
 
-    period_F123 = 'F1'
+
+    # Fasce orarie F1, F2, F3
+
 
     condF2  = (dateWeekDay == 6 and dateHour in range(7,22)) or \
               (date_YMD not in noWdays) and (dateHour in [7, 19, 20, 21, 22])
@@ -419,18 +389,20 @@ def datetime_to_F123(date_):
              dateWeekDay == 7 or \
              (dateHour in [23, 0, 1, 2, 3, 4, 5, 6])
 
+
     if condF2:
         period_F123 = 'F2'
-
-    if condF3:
+    elif condF3:
         period_F123 = 'F3'
+    else:
+        period_F123 = 'F1'
 
     #index quaterly of hour since 1= 00.00 to 96 = 23:45
     #format
     p_ = divmod(dateHour * 60 + date_.minute, 15) #period 0..95
     pp_= divmod(p_[0],4) #periods in hours
-    qHTime =  str(pp_[0])+ ':'+str('{:02d}'.format(pp_[1]*15))  #hh:mm
-    qH =    p_[0] + 1   #0...14
+    qHTime = str(pp_[0])+ ':'+str('{:02d}'.format(pp_[1]*15))  #hh:mm
+    qH = p_[0] + 1   #0...14  -> 1..15
 
     #Turno orario lavorativo
     #wp1 da 6 a 14
