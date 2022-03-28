@@ -9,6 +9,7 @@
 # v2.2 2020-12-29   fixed offset
 # v2.3 2021-04-23
 # v2.4 2021-05-15
+# v2.5 2022-03-03
 
 import struct
 import os
@@ -180,7 +181,7 @@ def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
         value_ = 0
         codeError += err_code['value_NaN']
 
-    return dict(idDevice=str(idDev),
+    return Dict_Generate(idDevice=str(idDev),
                 idParam=str(idParam),
                 Date=TimeStamp,
                 Value=float(value_),
@@ -188,7 +189,17 @@ def build_param(pDict, idDev, list_name, codeError, TimeStamp, Delay,):
                 Code=codeError
                 )
 
-#
+def Dict_Generate(idDevice, idParam, Date, Value, Delay, Code):
+    # Genera un dizionario dati
+    # v1.0 2022-03-03
+    return dict(idDevice=str(idDevice),
+                idParam=str(idParam),
+                Date=Date,
+                Value=float(Value),
+                Delay=Delay,
+                Code=Code
+                )
+    #
 # Log
 #
 def push_log(stringa):
