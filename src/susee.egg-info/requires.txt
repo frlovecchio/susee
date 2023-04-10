@@ -1,0 +1,10 @@
+numpy
+pandas
+mysql-connector
+pymodbus
+pytz
+scipy
+statsmodels
+python-decouple
+setuptools
+wheel
