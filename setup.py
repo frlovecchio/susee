@@ -5,7 +5,7 @@ with open('README.md', "r") as fh:
 
 setuptools.setup(
     name="susee",
-    version='2.0',
+    version='2.1',
     author="eng. Francesco Saverio Lovecchio, ph.D - Bari, Italy",
     author_email="frlovecchio@outlook.it",
     description="suSEE - Energy Monitoring System",
@@ -20,14 +20,15 @@ setuptools.setup(
         'numpy',
         'pandas',
         'mysql-connector',
-        'pymodbus=>3.2.2',  #requires python >3.8
+        'pymodbus>=3.2.2',  #requires python >3.8
         'pytz',
         'scipy',
         'statsmodels',
         'python-decouple',
         'setuptools',
         'wheel',
-        'bokeh==1.3.4',  # 2.4.3',
+        'bokeh',  #==1.3.4',  # 2.4.3',
+        'jinja2<3.1.0',  # due to bokeh==1.3.4
     ],
    
     classifiers=[

@@ -94,7 +94,7 @@ print('')
 print('')
 print('-' * 80)
 print('--- SUSEE - Energy Management System Platform     --- ')
-print('------------------------------------------------------ ')
+print('-' * 80)
 print('')
 print('--- Studio Tecnico Pugliautomazione - Bari, Italy --- ')
 print('--- eng. Francesco Saverio Lovecchio, ph.D.       --- ')
@@ -158,6 +158,8 @@ def main():
         t.setup_regs()
         threads.append(t)
 
+    '''todo: include custom function
+    #668 CUSTOM
     # List of  FAST devices (Second read loop)
     # Fast Sample
     listFastDevices = cLib.custom_table['List_fastDevices']
@@ -165,6 +167,7 @@ def main():
     for t in threads:
         if t.idDevPack['idDev'] in listFastDevices:
             threadsFast.append(t)
+    '''
 
     #
     # Setup EVENTS
@@ -595,6 +598,9 @@ def main():
                     push_log(msg_)
             '''
 
+
+            #todo: include custom function
+            '''
             # 4. fast device sample
             # v1.0 2022-07-10  - Continuosly sampling of some devices
             if options_['fastSample'] and lasting_time > 10:
@@ -678,6 +684,7 @@ def main():
                 #             #logger.info(f' - see_etl [msg] Check Connection uCode: {tt.uCode} connected ')
 
                 #5. Events
+            '''
 
         # ON - Sampling time
         # Activities

@@ -23,6 +23,7 @@
 # 2022-11-11  v4.7
 # 2022-11-17  v4.8
 # 2022-12-21  v4.9  build_param check range
+# 2023-04-10  v4.91 updated internet_ip
 
 
 from pymodbus.client import ModbusSerialClient as ModbusRTU
@@ -349,12 +350,18 @@ def internet_ip():
     # v2.0 2020-03-22
     # check if host/port is open and returns machine ip address
     # https://stackoverflow.com/questions/3764291/checking-network-connection
-    # 2022-02-14 renamed internet2()
+    # v1.0 2022-14 renamed internet2()
+    # v1.1 2023-04-10
 
     import socket
-    ipaddress = socket.gethostbyname(socket.gethostname())
-    if ipaddress == "127.0.0.1":
-       return False
-    else:
-        return True
+
+    try:
+        ipaddress = socket.gethostbyname(socket.gethostname())
+        if ipaddress == "127.0.0.1":
+           return False
+        else:
+            return True
+    except:
+        return False
+
 

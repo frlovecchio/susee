@@ -134,13 +134,21 @@ config_mysql = {
     }
 }
 
+# FAst devices second read loop
+custom_table = {
+    'Tabella_Misure_668': 'Tab_Misure',
+    'Tabella_MisureGG_668': 'Tab_MisureGG',
+    'Tabella_Produzione_668': 'Tab_Prod',
+    'List_fastDevices': ['d35', 'd36', 'd37', 'd41', 'd45', 'd46', 'd58'],  # ABB RelèMT, Temperature TRAFO 1 e TRAFO 2
+    'GDM_device' :'d00',
+}
 
 # List of devices
 idDevices_pack = {}
 
 idDevices_pack[0] = {
 
-    'typeDev': 'P32',
+    'typeDev': 'P32M5',
     'idDev': 'd00',
     'method': 'tcp',
     'ipAddr_COM': '192.168.1.100',
@@ -151,7 +159,7 @@ idDevices_pack[0] = {
 }
 
 idDevices_pack[1] = {
-    'typeDev': 'P32',
+    'typeDev': 'P32M5',
     'idDev': 'd01',
     'method': 'tcp',
     'ipAddr_COM': '192.168.1.101',
