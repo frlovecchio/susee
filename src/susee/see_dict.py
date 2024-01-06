@@ -10,7 +10,8 @@
 # v2.3 2021-02-21 params_id
 # v2.4 2021-05-26
 # v2.5 2021-06-09
-
+# v2.6 2022-07-31
+# v2.7 2022-09-02
 
 from datetime import datetime
 
@@ -43,6 +44,7 @@ store_mode  = {
 
 # Communication error Code
 err_code = {
+        'default'           :   0,
         'err_connection'    :   1,
         'driver error'      :   2,
         'server_off'        :   4,
@@ -50,6 +52,8 @@ err_code = {
         'value_NaN'         :   16,
         'lenreg_zero'       :   32,
         'driver not found'  :   64,
+        'internal_error'    :   128,
+        'limit error'       :   256,
 }
 
 
@@ -78,11 +82,13 @@ message_strings= {
     18:'msg_18 - push_db - DB ErrorCode: %s',
     19:'msg_19 - device not found - one time more attempt to read',
     20:'msg_20 - push_mesDATA() - database connection failed',
-    21:'msg_21 - push_mesDATA() - MES table updated',
+    21:'msg_21 - push_mesDATA() - Custom table updated',
     22:'msg_22 - server check -  %s',
     23:'msg_23 - db check -  %s',
     24:'msg_24 - Completata routine svuota_tempArray...',
     }
 
+import numpy as np
+nok_data = ['inf', '-inf', 'nan', 'NaN', 'None', None, np.inf, np.nan]
 
 
